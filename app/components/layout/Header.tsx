@@ -13,8 +13,8 @@ export default function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Image src="/logo.svg" alt="Blog Logo" width={40} height={40} />
-            <span className="ml-2 text-xl font-bold">MonBlog</span>
+            <Image src="/image/ram.png" alt="Blog Logo" width={80} height={80} />
+          
           </Link>
 
           {/* Desktop Navigation */}
