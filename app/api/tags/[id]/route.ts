@@ -130,4 +130,75 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       
       if (existingTag) {
         return NextResponse.json(
-          { error: "Un tag
+          { error: "Un tag avec ce nom ou ce slug existe déjà" },
+          { status: 400 }
+        );
+      }
+    }
+    
+    // Mettre à jour le tag
+    const updatedTag = await prisma.tag.update({
+      where: { id: tagId },
+      data: {
+        name: body.name,
+        ...(slug && { slug })
+      },
+      include: {
+        _count: {
+          select: {
+            articles: true
+          }
+        }
+      }
+    });
+    
+    return NextResponse.json(updatedTag);
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du tag:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la mise à jour du tag" },
+      { status: 500 }
+    );
+  }
+}
+
+// Supprimer un tag (admin uniquement)
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    const tagId = params.id;
+    
+    // Vérifier si l'utilisateur est un admin
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Non autorisé" },
+        { status: 403 }
+      );
+    }
+    
+    // Vérifier si le tag existe
+    const tag = await prisma.tag.findUnique({
+      where: { id: tagId }
+    });
+    
+    if (!tag) {
+      return NextResponse.json(
+        { error: "Tag non trouvé" },
+        { status: 404 }
+      );
+    }
+    
+    // Supprimer le tag
+    await prisma.tag.delete({
+      where: { id: tagId }
+    });
+    
+    return NextResponse.json({ message: "Tag supprimé avec succès" });
+  } catch (error) {
+    console.error("Erreur lors de la suppression du tag:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression du tag" },
+      { status: 500 }
+    );
+  }
+}

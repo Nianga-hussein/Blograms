@@ -227,7 +227,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (body.categoryIds) {
       updateData.categories = {
         set: [],
-        connect: body.categoryIds.map(id => ({ id }))
+        connect: body.categoryIds.map((id: any) => ({ id }))
       };
     }
     
@@ -235,7 +235,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (body.tagIds) {
       updateData.tags = {
         set: [],
-        connect: body.tagIds.map(id => ({ id }))
+        connect: body.tagIds.map((id: any) => ({ id }))
       };
     }
     

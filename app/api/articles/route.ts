@@ -208,10 +208,10 @@ export async function POST(request: NextRequest) {
           connect: { id: session.user.id }
         },
         categories: body.categoryIds?.length 
-          ? { connect: body.categoryIds.map(id => ({ id })) }
+          ? { connect: body.categoryIds.map((id: any) => ({ id })) }
           : undefined,
         tags: body.tagIds?.length
-          ? { connect: body.tagIds.map(id => ({ id })) }
+          ? { connect: body.tagIds.map((id: any) => ({ id })) }
           : undefined
       },
       include: {
