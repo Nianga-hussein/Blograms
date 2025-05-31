@@ -1,120 +1,136 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      isScrolled ? 'header-blur shadow-lg' : 'bg-transparent'
+    }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Image src="/image/ram.png" alt="Blog Logo" width={80} height={80} />
-          
+          {/* Logo avec animation */}
+          <Link href="/" className="flex items-center group">
+            <div className="relative overflow-hidden rounded-full">
+              <Image 
+                src="/image/ram.png" 
+                alt="Blog Logo" 
+                width={60} 
+                height={60}
+                className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12"
+              />
+            </div>
+            <span className="ml-3 text-2xl font-bold gradient-text hidden sm:block">
+              ModernBlog
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Navigation Desktop avec animations */}
           <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-indigo-600 transition-colors">
-              Accueil
-            </Link>
-            <Link href="/categories" className="text-gray-700 hover:text-indigo-600 transition-colors">
-              Catégories
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:text-indigo-600 transition-colors">
-              À propos
-            </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-indigo-600 transition-colors">
-              Contact
-            </Link>
+            {[
+              { href: '/', label: 'Accueil' },
+              { href: '/categories', label: 'Catégories' },
+              { href: '/about', label: 'À propos' },
+              { href: '/contact', label: 'Contact' }
+            ].map((item, index) => (
+              <Link 
+                key={item.href}
+                href={item.href} 
+                className="relative text-gray-700 hover:text-primary transition-all duration-300 font-medium group animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            ))}
           </nav>
 
-          {/* Auth Buttons */}
+          {/* Boutons d'authentification */}
           <div className="hidden md:flex items-center space-x-4">
             <Link 
               href="/login" 
-              className="px-4 py-2 text-indigo-600 hover:text-indigo-800 transition-colors"
+              className="px-6 py-2 text-primary hover:text-primary-dark transition-all duration-300 font-medium relative group"
             >
               Connexion
+              <span className="absolute inset-0 border border-primary rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></span>
             </Link>
             <Link 
               href="/register" 
-              className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
+              className="btn-primary animate-float"
             >
               Inscription
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Menu mobile */}
           <button 
-            className="md:hidden focus:outline-none" 
+            className="md:hidden relative w-8 h-8 flex flex-col justify-center items-center group"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${
+              isMenuOpen ? 'rotate-45 translate-y-1' : ''
+            }`}></span>
+            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 mt-1 ${
+              isMenuOpen ? 'opacity-0' : ''
+            }`}></span>
+            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 mt-1 ${
+              isMenuOpen ? '-rotate-45 -translate-y-1' : ''
+            }`}></span>
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 pb-6">
-            <nav className="flex flex-col space-y-4">
+        {/* Menu mobile avec animation */}
+        <div className={`md:hidden transition-all duration-300 overflow-hidden ${
+          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <nav className="py-4 space-y-4">
+            {[
+              { href: '/', label: 'Accueil' },
+              { href: '/categories', label: 'Catégories' },
+              { href: '/about', label: 'À propos' },
+              { href: '/contact', label: 'Contact' }
+            ].map((item, index) => (
               <Link 
-                href="/" 
-                className="text-gray-700 hover:text-indigo-600 transition-colors"
+                key={item.href}
+                href={item.href} 
+                className="block px-4 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg transition-all duration-300 animate-fade-in-left"
+                style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Accueil
+                {item.label}
               </Link>
+            ))}
+            <div className="px-4 pt-4 space-y-2">
               <Link 
-                href="/categories" 
-                className="text-gray-700 hover:text-indigo-600 transition-colors"
+                href="/login" 
+                className="block w-full text-center px-4 py-2 text-primary border border-primary rounded-full hover:bg-primary hover:text-white transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Catégories
+                Connexion
               </Link>
               <Link 
-                href="/about" 
-                className="text-gray-700 hover:text-indigo-600 transition-colors"
+                href="/register" 
+                className="block w-full text-center btn-primary"
                 onClick={() => setIsMenuOpen(false)}
               >
-                À propos
+                Inscription
               </Link>
-              <Link 
-                href="/contact" 
-                className="text-gray-700 hover:text-indigo-600 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              <div className="pt-4 flex flex-col space-y-2">
-                <Link 
-                  href="/login" 
-                  className="px-4 py-2 text-center text-indigo-600 hover:text-indigo-800 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Connexion
-                </Link>
-                <Link 
-                  href="/register" 
-                  className="px-4 py-2 text-center bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Inscription
-                </Link>
-              </div>
-            </nav>
-          </div>
-        )}
+            </div>
+          </nav>
+        </div>
       </div>
     </header>
   );

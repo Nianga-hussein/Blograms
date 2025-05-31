@@ -1,64 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-
-interface Comment {
-  id: string;
-  author: {
-    name: string;
-    image: string;
-  };
-  content: string;
-  date: string;
-}
+import { getCommentsByArticleId, addComment } from "../../../lib/api";
+import { Comment } from "../../../types";
 
 export default function CommentSection({ articleId }: { articleId: string }) {
-  // Simuler les commentaires
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: "1",
-      author: {
-        name: "Marie Dupont",
-        image: "/images/author-2.jpg",
-      },
-      content: "Super article, très instructif !",
-      date: "15 Oct 2023",
-    },
-    {
-      id: "2",
-      author: {
-        name: "Pierre Martin",
-        image: "/images/author-3.jpg",
-      },
-      content: "J'ai une question concernant la partie sur les API routes. Est-ce que vous pourriez détailler davantage ce point ?",
-      date: "16 Oct 2023",
-    },
-  ]);
-
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Charger les commentaires au chargement du composant
+  useEffect(() => {
+    const loadComments = async () => {
+      const fetchedComments = await getCommentsByArticleId(articleId);
+      setComments(fetchedComments);
+    };
+    loadComments();
+  }, [articleId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    // Simuler l'ajout d'un nouveau commentaire
-    const comment: Comment = {
-      id: Date.now().toString(),
-      author: {
-        name: "Utilisateur connecté",
-        image: "/images/default-avatar.jpg",
-      },
-      content: newComment,
-      date: new Date().toLocaleDateString("fr-FR", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
-    };
+    setIsLoading(true);
+    setError("");
 
-    setComments([...comments, comment]);
-    setNewComment("");
+    try {
+      const comment = await addComment(articleId, newComment);
+      if (comment) {
+        setComments(prev => [comment, ...prev]);
+        setNewComment("");
+      } else {
+        setError("Impossible d'ajouter le commentaire. Veuillez réessayer.");
+      }
+    } catch (err) {
+      setError("Une erreur est survenue. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
